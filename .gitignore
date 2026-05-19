@@ -25,6 +25,8 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+# IntelliJ run configurations
+.run/
 
 ### NetBeans ###
 /nbproject/private/

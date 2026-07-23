@@ -6,10 +6,8 @@ import com.lampasoftware.algasensor.temperature.monitoring.domain.model.SensorMo
 import com.lampasoftware.algasensor.temperature.monitoring.domain.repository.SensorMonitoringRepository;
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/sensors/{sensorId}/monitoring")
@@ -20,13 +18,7 @@ public class SensorMonitoringController {
 
     @GetMapping
     public SensorMonitoringOutput getDetail(@PathVariable TSID sensorId){
-        SensorMonitoring sensorMonitoring = sensorMonitoringRepository.findById(new SensorId(sensorId))
-                .orElse(SensorMonitoring.builder()
-                        .id(new SensorId(sensorId))
-                        .enabled(false)
-                        .lastTemperature(null)
-                        .updatedAt(null)
-                        .build());
+        SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
 
         return SensorMonitoringOutput.builder()
                 .id(sensorMonitoring.getId().getValue())
@@ -34,5 +26,31 @@ public class SensorMonitoringController {
                 .lastTemperature(sensorMonitoring.getLastTemperature())
                 .updatedAt(sensorMonitoring.getUpdatedAt())
                 .build();
+    }
+
+    @PutMapping("/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enable(@PathVariable TSID sensorId){
+        SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
+        sensorMonitoring.setEnabled(true);
+        sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
+    }
+
+    @DeleteMapping("/disable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disable(@PathVariable TSID sensorId){
+        SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
+        sensorMonitoring.setEnabled(false);
+        sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
+    }
+
+    private SensorMonitoring findByIdOrDefault(TSID sensorId) {
+        return sensorMonitoringRepository.findById(new SensorId(sensorId))
+                .orElse(SensorMonitoring.builder()
+                        .id(new SensorId(sensorId))
+                        .enabled(false)
+                        .lastTemperature(null)
+                        .updatedAt(null)
+                        .build());
     }
 }

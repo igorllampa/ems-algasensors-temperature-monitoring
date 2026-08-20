@@ -7,7 +7,7 @@ import io.hypersistence.tsid.TSID;
 
 import java.io.IOException;
 
-public class TSIDStringSerializer extends JsonSerializer<TSID> {
+public class TSIDToStringSerializer extends JsonSerializer<TSID> {
 
     @Override
     public void serialize(TSID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

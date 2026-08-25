@@ -21,7 +21,8 @@ public class RabbitMQListener {
 
     private final TemperatureMonitoringService temperatureMonitoringService;
 
-    @RabbitListener(queues = RabbitMQConfig.PROCESS_TEMPERATURE_V_1_Q)
+    // concurrency param means that spring initialize with at least 2 consumers and can increase up to three consumers.
+    @RabbitListener(queues = RabbitMQConfig.PROCESS_TEMPERATURE_V_1_Q, concurrency = "2-3")
     @SneakyThrows
     public void handle(@Payload TemperatureLogData temperatureLogData,
                        @Headers Map<String, Object> headers){

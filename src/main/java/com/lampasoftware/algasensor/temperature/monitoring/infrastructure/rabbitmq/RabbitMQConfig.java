@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String PROCESS_TEMPERATURE_V_1_Q = "temperature-monitoring.process-temperature.v1.q";
+    public static final String QUEUE_PROCESS_TEMPERATURE_V_1_Q = "temperature-monitoring.process-temperature.v1.q";
+    public static final String QUEUE_ALERT_TEMPERATURE_V_1_Q = "temperature-monitoring.alert-temperature.v1.q";
 
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper){
@@ -24,8 +25,13 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue queue(){
-        return QueueBuilder.durable(PROCESS_TEMPERATURE_V_1_Q).build();
+    public Queue queueProcessTemperature(){
+        return QueueBuilder.durable(QUEUE_PROCESS_TEMPERATURE_V_1_Q).build();
+    }
+
+    @Bean
+    public Queue queueAlertTemperature(){
+        return QueueBuilder.durable(QUEUE_ALERT_TEMPERATURE_V_1_Q).build();
     }
 
     public FanoutExchange exchange(){
@@ -36,8 +42,15 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding binding(){
-        return BindingBuilder.bind(queue()).to(exchange());
+    public Binding bindingProcessTemperature(){
+        //As this queue is binded to the same main exchange it will receive the message from there as well as alert messages
+        return BindingBuilder.bind(queueProcessTemperature()).to(exchange());
+    }
+
+    @Bean
+    public Binding bindingAlertTemperature(){
+        //As this queue is binded to the same main exchange it will receive the message from there as well as process messages
+        return BindingBuilder.bind(queueAlertTemperature()).to(exchange());
     }
 
 }

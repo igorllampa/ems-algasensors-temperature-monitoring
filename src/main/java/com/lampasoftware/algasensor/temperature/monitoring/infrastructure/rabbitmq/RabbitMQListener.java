@@ -22,16 +22,28 @@ public class RabbitMQListener {
     private final TemperatureMonitoringService temperatureMonitoringService;
 
     // concurrency param means that spring initialize with at least 2 consumers and can increase up to three consumers.
-    @RabbitListener(queues = RabbitMQConfig.PROCESS_TEMPERATURE_V_1_Q, concurrency = "2-3")
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESS_TEMPERATURE_V_1_Q, concurrency = "2-3")
     @SneakyThrows
-    public void handle(@Payload TemperatureLogData temperatureLogData,
-                       @Headers Map<String, Object> headers){
+    public void handleProcessTemperature(@Payload TemperatureLogData temperatureLogData,
+                                         @Headers Map<String, Object> headers){
         TSID sensorId = temperatureLogData.getSensorId();
         Double temperature = temperatureLogData.getValue();
         log.info("Temperature updated: SensorId {} Temp {}", sensorId, temperature);
         log.info("Headers: {}", headers.toString());
 
         temperatureMonitoringService.processTemperatureReading(temperatureLogData);
+
+        Thread.sleep(Duration.ofSeconds(5));
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_ALERT_TEMPERATURE_V_1_Q, concurrency = "2-3")
+    @SneakyThrows
+    public void handleAlertTemperature(@Payload TemperatureLogData temperatureLogData,
+                                         @Headers Map<String, Object> headers){
+        TSID sensorId = temperatureLogData.getSensorId();
+        Double temperature = temperatureLogData.getValue();
+        log.info("Temperature alert: SensorId {} Temp {}", sensorId, temperature);
+        log.info("Headers: {}", headers.toString());
 
         Thread.sleep(Duration.ofSeconds(5));
     }

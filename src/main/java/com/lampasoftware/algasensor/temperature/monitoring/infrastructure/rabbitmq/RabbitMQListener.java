@@ -1,6 +1,7 @@
 package com.lampasoftware.algasensor.temperature.monitoring.infrastructure.rabbitmq;
 
 import com.lampasoftware.algasensor.temperature.monitoring.api.model.TemperatureLogData;
+import com.lampasoftware.algasensor.temperature.monitoring.domain.service.SensorAlertService;
 import com.lampasoftware.algasensor.temperature.monitoring.domain.service.TemperatureMonitoringService;
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import java.util.Map;
 public class RabbitMQListener {
 
     private final TemperatureMonitoringService temperatureMonitoringService;
+
+    private final SensorAlertService sensorAlertService;
 
     // concurrency param means that spring initialize with at least 2 consumers and can increase up to three consumers.
     @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESS_TEMPERATURE_V_1_Q, concurrency = "2-3")
@@ -45,6 +48,7 @@ public class RabbitMQListener {
         log.info("Temperature alert: SensorId {} Temp {}", sensorId, temperature);
         log.info("Headers: {}", headers.toString());
 
+        sensorAlertService.handleAlert(temperatureLogData);
         Thread.sleep(Duration.ofSeconds(5));
     }
 }

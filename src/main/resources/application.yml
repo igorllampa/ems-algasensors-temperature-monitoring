@@ -25,3 +25,9 @@ spring:
     listener:
       simple:
         prefetch: 4 # limits the amount of messages that are captured per time by the consumer.
+        retry: # define the retry parameters that will be used in case of communication or processing failing by consumer. After attempts the message will be removed from the queue in this case
+          enabled: true
+          initial-interval: 10s
+          max-interval: 30s
+          multiplier: 2
+          max-attempts: 3
